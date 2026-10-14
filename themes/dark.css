@@ -1,0 +1,206 @@
+/* ==========================================================================
+   GoJubila PRO - Tema Oscuro Moderno (Plantilla Completa de Referencia)
+   ==========================================================================
+   Este archivo define el tema Oscuro nativo con todos los design tokens
+   y colores de componentes disponibles en el motor gráfico de GoJubila.
+   Puedes usar este archivo como plantilla maestra para crear tus propios temas.
+   ========================================================================== */
+
+:root {
+  /* Metadatos del Tema */
+  --name: dark-css;
+  --display-name: "Oscuro Moderno (CSS)";
+  --is-dark: true;
+
+  /* --------------------------------------------------------------------------
+     1. Superficies y Fondos Base
+     -------------------------------------------------------------------------- */
+  --app-background:      #020617; /* Fondo principal de la ventana (Slate 950) */
+  --navbar-bg:           #0f172a; /* Fondo de la barra superior de navegación */
+  --card-bg:             #0f172a; /* Fondo de tarjetas de contenido y paneles */
+  --card-border:         #1e293b; /* Borde perimetral de tarjetas (Slate 800) */
+  --sidebar-bg:          #0f172a; /* Fondo del menú lateral (Slate 900) */
+  --sidebar-shaded-bg:   #020617; /* Fondo sombreado o secundario del sidebar */
+  --filter-drawer-bg:    #0f172a; /* Fondo del cajón lateral de filtros */
+  --inset-panel-bg:      #1e293b; /* Fondo de paneles incrustados / cajas de entrada */
+
+  /* --------------------------------------------------------------------------
+     2. Bordes y Divisores
+     -------------------------------------------------------------------------- */
+  --border:              #334155; /* Bordes estructurales generales (Slate 700) */
+  --divider:             #334155; /* Líneas divisorias horizontales y separadores */
+
+  /* --------------------------------------------------------------------------
+     3. Tipografía General
+     -------------------------------------------------------------------------- */
+  --text-primary:        #f8fafc; /* Texto principal de alto contraste (Slate 50) */
+  --text-muted:          #94a3b8; /* Texto secundario, etiquetas y subtítulos (Slate 400) */
+  --nav-inactive-fg:     #93c5fd; /* Texto de pestañas o botones de navegación inactivos */
+
+  /* --------------------------------------------------------------------------
+     4. Tokens Semánticos de Estado
+     -------------------------------------------------------------------------- */
+  --accent:              #818cf8; /* Acento primario de la aplicación (Indigo 400) */
+  --success:             #34d399; /* Indicador de éxito / pensión neta (Emerald 400) */
+  --warning:             #fbbf24; /* Indicador de advertencia / precaución (Amber 400) */
+  --danger:              #f87171; /* Indicador de error / peligro / coef. penalizador (Red 400) */
+
+  /* --------------------------------------------------------------------------
+     5. Controles e Inputs
+     -------------------------------------------------------------------------- */
+  --input-bg:            #1e293b; /* Fondo de cajas de texto y campos numéricos */
+  --input-border:        #334155; /* Borde de campos de entrada en reposo */
+  --hover:               #334155; /* Fondo de resaltado al pasar el ratón (hover general) */
+  --selection:           #3730a3; /* Fondo de elementos seleccionados (Indigo 800) */
+  --disabled:            #475569; /* Color de controles o textos deshabilitados */
+  --disabled-button:     #1e293b; /* Fondo de botones desactivados */
+
+  /* --------------------------------------------------------------------------
+     6. Cabecera Ejecutiva (ModernHeaderCard / Banner con Degradado)
+     -------------------------------------------------------------------------- */
+  --header-banner-top:      #1c5239; /* Color superior del degradado del banner */
+  --header-banner-bottom:   #0f3826; /* Color inferior del degradado del banner */
+  --header-banner-divider:  #0b291c; /* Línea divisoria inferior del banner */
+  --header-body-bg:         #0f172a; /* Fondo del cuerpo inferior de la tarjeta */
+  --header-border:          #1e293b; /* Borde perimetral exterior de la tarjeta */
+  --header-title:           #ffffff; /* Título principal del banner */
+  --header-subtitle:        rgba(167, 243, 208, 0.86); /* Subtítulo con opacidad */
+
+  /* --------------------------------------------------------------------------
+     7. Insignias y Pastillas de Estado (ModernBadge)
+     -------------------------------------------------------------------------- */
+  /* Éxito (Success / Cumple Requisitos) */
+  --badge-success-bg:       rgba(6, 78, 59, 0.78);
+  --badge-success-text:     #86efac;
+  --badge-success-border:   #10b981;
+
+  /* Peligro (Danger / Penalización / Invalidez) */
+  --badge-danger-bg:        rgba(127, 29, 29, 0.78);
+  --badge-danger-text:      #fca5a5;
+  --badge-danger-border:    #ef4444;
+
+  /* Información (Info / Años Cotizados / Régimen) */
+  --badge-info-bg:          rgba(30, 58, 138, 0.78);
+  --badge-info-text:        #93c5fd;
+  --badge-info-border:      #3b82f6;
+
+  /* Advertencia (Warning / Demora / Alerta) */
+  --badge-warning-bg:       rgba(120, 53, 15, 0.78);
+  --badge-warning-text:     #fde68a;
+  --badge-warning-border:   #f59e0b;
+
+  /* Púrpura (Purple / Método Dual / Comparativa) */
+  --badge-purple-bg:        rgba(88, 28, 135, 0.78);
+  --badge-purple-text:      #d8b4fe;
+  --badge-purple-border:    #a855f7;
+
+  /* Neutro (Neutral / Inactivo / Informativo) */
+  --badge-neutral-bg:       #1e293b;
+  --badge-neutral-text:     #cbd5e1;
+  --badge-neutral-border:   #334155;
+
+  /* --------------------------------------------------------------------------
+     8. Botones de Acción (ModernButton)
+     -------------------------------------------------------------------------- */
+  /* Botón Primario (Acciones destacadas: Calcular, Guardar) */
+  --btn-primary-bg:              #4f46e5;
+  --btn-primary-fg:              #ffffff;
+  --btn-primary-border:          #6366f1;
+  --btn-primary-hover-bg:        #4338ca;
+  --btn-primary-hover-fg:        #ffffff;
+  --btn-primary-hover-border:    #818cf8;
+  --btn-primary-press-bg:        #3730a3;
+  --btn-primary-press-fg:        #ffffff;
+  --btn-primary-press-border:    #6366f1;
+  --btn-primary-disabled-bg:     #1e293b;
+  --btn-primary-disabled-fg:     #94a3b8;
+  --btn-primary-disabled-border: #334155;
+
+  /* Botón Estándar (Acciones secundarias: Cancelar, Examinar, Filtrar) */
+  --btn-default-bg:              #1e293b;
+  --btn-default-fg:              #f1f5f9;
+  --btn-default-border:          #334155;
+  --btn-default-hover-bg:        #334155;
+  --btn-default-hover-fg:        #ffffff;
+  --btn-default-hover-border:    #475569;
+  --btn-default-press-bg:        #0f172a;
+  --btn-default-press-fg:        #ffffff;
+  --btn-default-press-border:    #475569;
+  --btn-default-disabled-bg:     #0f172a;
+  --btn-default-disabled-fg:     #475569;
+  --btn-default-disabled-border: #1e293b;
+
+  /* Botón de Peligro (Acciones destructivas: Eliminar, Reiniciar) */
+  --btn-danger-bg:               #1e293b;
+  --btn-danger-fg:               #f87171;
+  --btn-danger-border:           #f87171;
+  --btn-danger-hover-bg:         #334155;
+  --btn-danger-hover-fg:         #ffffff;
+  --btn-danger-hover-border:     #fca5a5;
+  --btn-danger-press-bg:         #0f172a;
+  --btn-danger-press-fg:         #ffffff;
+  --btn-danger-press-border:     #f87171;
+  --btn-danger-disabled-bg:      #0f172a;
+  --btn-danger-disabled-fg:      #475569;
+  --btn-danger-disabled-border:  #1e293b;
+
+  /* --------------------------------------------------------------------------
+     9. Tablas y Rejillas de Datos (ModernBrowse)
+     -------------------------------------------------------------------------- */
+  --table-header-bg:        #1e293b; /* Fondo de la cabecera de columnas */
+  --table-header-fg:        #94a3b8; /* Texto de la cabecera en reposo */
+  --table-header-hover-fg:  #f8fafc; /* Texto de la cabecera al pasar el ratón */
+  --table-sort-indicator:   #38bdf8; /* Color de flecha de ordenación activa */
+  --table-row-even:         #0f172a; /* Fondo de filas pares (alternadas) */
+  --table-row-odd:          #1e293b; /* Fondo de filas impares */
+  --table-row-hover:        #334155; /* Fondo de fila al pasar el ratón */
+  --table-row-selected:     #1e3a8a; /* Fondo de fila seleccionada */
+  --table-border:           #334155; /* Borde exterior y divisores de celdas */
+
+  /* --------------------------------------------------------------------------
+     10. Gráficos y Visualización (ModernLineChart)
+     -------------------------------------------------------------------------- */
+  --chart-tooltip-bg:       #0f172a; /* Fondo del cuadro flotante del gráfico */
+  --chart-tooltip-border:   #38bdf8; /* Borde iluminado del tooltip */
+  --chart-tooltip-title:    #ffffff; /* Título principal del tooltip (fecha/año) */
+  --chart-tooltip-subtitle: #94a3b8; /* Subtítulo del tooltip */
+  --chart-tooltip-divider:  #334155; /* Divisor interno del tooltip */
+  --chart-tooltip-text:     #f8fafc; /* Texto con importes y valores */
+  --chart-tooltip-muted:    #94a3b8; /* Etiquetas o leyendas secundarias */
+  --chart-guideline:        #0284c7; /* Línea guía vertical de rastreo */
+  --chart-badge-bg:         #0f172a; /* Fondo de la etiqueta del eje */
+  --chart-badge-text:       #ffffff; /* Texto de la etiqueta del eje */
+
+  /* --------------------------------------------------------------------------
+     11. Identidad de Usuario y Avatares
+     -------------------------------------------------------------------------- */
+  --avatar-bg:              #1e293b; /* Fondo circular del avatar */
+  --avatar-fg:              #60a5fa; /* Iniciales o icono del avatar */
+
+  /* --------------------------------------------------------------------------
+     12. Tarjetas de Métricas KPI Hero (ModernKPICard)
+     -------------------------------------------------------------------------- */
+  --kpi-emerald-accent:     #10b981;
+  --kpi-emerald-value:      #10b981;
+  --kpi-emerald-bg:         #064e3b;
+  --kpi-emerald-border:     #065f46;
+  --kpi-emerald-subtitle:   #6ee7b7;
+
+  --kpi-blue-accent:        #3b82f6;
+  --kpi-blue-value:         #3b82f6;
+  --kpi-blue-bg:            #1e3a8a;
+  --kpi-blue-border:        #1d4ed8;
+  --kpi-blue-subtitle:      #93c5fd;
+
+  --kpi-violet-accent:      #818cf8;
+  --kpi-violet-value:       #818cf8;
+  --kpi-violet-bg:          #1e1b4b;
+  --kpi-violet-border:      #4338ca;
+  --kpi-violet-subtitle:    #a5b4fc;
+
+  --kpi-amber-accent:       #f59e0b;
+  --kpi-amber-value:        #f59e0b;
+  --kpi-amber-bg:           #451a03;
+  --kpi-amber-border:       #78350f;
+  --kpi-amber-subtitle:     #fcd34d;
+}

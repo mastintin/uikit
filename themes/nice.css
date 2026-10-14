@@ -1,0 +1,230 @@
+/* ==========================================================================
+   GoJubila PRO - Tema Nice Clásico / xlsJubila (CSS Externo)
+   ==========================================================================
+   Tema claro corporativo y ejecutivo inspirado en hojas de cálculo (Excel)
+   y en la interfaz histórica de xlsJubila:
+   - Fondos claros pulidos (Slate 100/White) de excelente legibilidad.
+   - Barra superior ejecutiva Slate 900 (#0f172a).
+   - Cabecera con degradado verde corporativo esmeralda (#0a624b -> #064e3b).
+   - Botones primarios en verde corporativo #107c41 con soporte de opacidad.
+   - Insignias con tonos suaves de salvia, terracota, cielo y ámbar.
+   ========================================================================== */
+
+:root {
+  /* Metadatos del Tema */
+  --name: nice;
+  --display-name: "Nice (xlsJubila)";
+  --is-dark: false;
+
+  /* --------------------------------------------------------------------------
+     Triplets RGB para composición dinámica de opacidades con rgba(...)
+     -------------------------------------------------------------------------- */
+  --primary-rgb:   16, 124, 65;   /* #107c41 - Verde corporativo xlsJubila */
+  --accent-rgb:    30, 64, 175;   /* #1e40af - Cobalto ejecutivo */
+  --danger-rgb:    176, 58, 46;   /* #b03a2e - Terracota advertencia */
+  --warning-rgb:   251, 191, 36;  /* #fbbf24 - Ámbar dorado */
+  --slate-dark-rgb: 15, 23, 42;   /* #0f172a - Slate 900 texto / navbar */
+
+  /* --------------------------------------------------------------------------
+     1. Superficies y Fondos Base
+     -------------------------------------------------------------------------- */
+  --app-background:      #f1f5f9; /* Fondo principal de la ventana (Slate 100) */
+  --navbar-bg:           #0f172a; /* Fondo de la barra superior de navegación (Slate 900) */
+  --card-bg:             #ffffff; /* Fondo blanco puro para tarjetas y paneles */
+  --card-border:         #cbd5e1; /* Borde perimetral de tarjetas (Slate 300) */
+  --sidebar-bg:          #ffffff; /* Fondo del menú lateral */
+  --sidebar-shaded-bg:   #f8fafc; /* Fondo sombreado del menú lateral (Slate 50) */
+  --filter-drawer-bg:    #f1f5f9; /* Fondo del cajón lateral de filtros */
+  --inset-panel-bg:      #f8fafc; /* Fondo de cajas incrustadas y formularios */
+
+  /* --------------------------------------------------------------------------
+     2. Bordes y Divisores
+     -------------------------------------------------------------------------- */
+  --border:              #e2e8f0; /* Bordes estructurales generales (Slate 200) */
+  --divider:             #e2e8f0; /* Líneas divisorias y separadores horizontales */
+
+  /* --------------------------------------------------------------------------
+     3. Tipografía General
+     -------------------------------------------------------------------------- */
+  --text-primary:        #0f172a; /* Texto principal oscuro de alto contraste (Slate 900) */
+  --text-muted:          #334155; /* Texto secundario, subtítulos y etiquetas (Slate 700) */
+  --nav-inactive-fg:     #93c5fd; /* Texto de pestañas inactivas en navbar (Sky 300) */
+
+  /* --------------------------------------------------------------------------
+     4. Tokens Semánticos de Estado
+     -------------------------------------------------------------------------- */
+  --accent:              #1e40af; /* Acento cobalto ejecutivo (Cobalt 800) */
+  --success:             #107c41; /* Verde corporativo / pensión neta favorable (Emerald 600) */
+  --warning:             #fbbf24; /* Indicador de advertencia / demora (Amber 400) */
+  --danger:              #b03a2e; /* Terracota intenso para peligro o advertencia */
+
+  /* --------------------------------------------------------------------------
+     5. Controles e Inputs
+     -------------------------------------------------------------------------- */
+  --input-bg:            #ffffff; /* Fondo blanco de campos de entrada de texto */
+  --input-border:        #cbd5e1; /* Borde de inputs en reposo (Slate 300) */
+  --hover:               #f1f5f9; /* Fondo de resaltado hover general (Slate 100) */
+  --selection:           #a7f3d0; /* Fondo de selección / foco verde menta suave (Emerald 200) */
+  --disabled:            #94a3b8; /* Color de controles deshabilitados (Slate 400) */
+  --disabled-button:     #f1f5f9; /* Fondo de botones desactivados */
+
+  /* --------------------------------------------------------------------------
+     6. Cabecera Ejecutiva (ModernHeaderCard / Banner con Degradado)
+     -------------------------------------------------------------------------- */
+  --header-banner-top:      #0a624b; /* Verde oscuro superior del degradado */
+  --header-banner-bottom:   #064e3b; /* Verde bosque inferior del degradado */
+  --header-banner-divider:  #022c22; /* Línea divisoria inferior */
+  --header-body-bg:         #ffffff; /* Fondo del cuerpo inferior de la tarjeta */
+  --header-border:          #cbd5e1; /* Borde perimetral exterior */
+  --header-title:           #ffffff; /* Título principal del banner en blanco */
+  --header-subtitle:        rgba(167, 243, 208, 0.86); /* Subtítulo verde menta con opacidad */
+
+  /* --------------------------------------------------------------------------
+     7. Insignias y Pastillas de Estado (ModernBadge)
+     -------------------------------------------------------------------------- */
+  /* Éxito (Success / Cumple Requisitos / Activo - Tono salvia oliva) */
+  --badge-success-bg:       #e8f0e6;
+  --badge-success-text:     #4a5d4e;
+  --badge-success-border:   #cdddca;
+
+  /* Peligro / Borrado (Danger / Penalización - Tono terracota suave) */
+  --badge-danger-bg:        #fadbd8;
+  --badge-danger-text:      #b03a2e;
+  --badge-danger-border:    #f5b7b1;
+
+  /* Información (Info / Años Cotizados / Régimen - Azul corporativo) */
+  --badge-info-bg:          #eff6ff;
+  --badge-info-text:        #2563eb;
+  --badge-info-border:      #bfdbfe;
+
+  /* Advertencia (Warning / Demora / Alerta - Ámbar) */
+  --badge-warning-bg:       #fef3c7;
+  --badge-warning-text:     #92400e;
+  --badge-warning-border:   #fde68a;
+
+  /* Púrpura (Purple / Método Dual / Comparativa) */
+  --badge-purple-bg:        #f3e8ff;
+  --badge-purple-text:      #7e22ce;
+  --badge-purple-border:    #e9d5ff;
+
+  /* Neutro (Neutral / Inactivo / Informativo) */
+  --badge-neutral-bg:       #f1f5f9;
+  --badge-neutral-text:     #475569;
+  --badge-neutral-border:   #e2e8f0;
+
+  /* --------------------------------------------------------------------------
+     8. Botones de Acción (ModernButton)
+     -------------------------------------------------------------------------- */
+  /* Botón Primario (Calcular, Guardar, Acción principal) */
+  --btn-primary-bg:              #107c41;
+  --btn-primary-fg:              #ffffff;
+  --btn-primary-border:          #0e6a37;
+  --btn-primary-hover-bg:        #15803d;
+  --btn-primary-hover-fg:        #ffffff;
+  --btn-primary-hover-border:    #166534;
+  --btn-primary-press-bg:        #0a4d28;
+  --btn-primary-press-fg:        #ffffff;
+  --btn-primary-press-border:    #0a4d28;
+  --btn-primary-disabled-bg:     rgba(var(--primary-rgb), 0.06);
+  --btn-primary-disabled-fg:     #a7f3d0;
+  --btn-primary-disabled-border: rgba(var(--primary-rgb), 0.16);
+
+  /* Botón Estándar (Cancelar, Examinar, Filtrar) */
+  --btn-default-bg:              #ffffff;
+  --btn-default-fg:              #0f172a;
+  --btn-default-border:          #cbd5e1;
+  --btn-default-hover-bg:        #f1f5f9;
+  --btn-default-hover-fg:        #0f172a;
+  --btn-default-hover-border:    #94a3b8;
+  --btn-default-press-bg:        #e2e8f0;
+  --btn-default-press-fg:        #0f172a;
+  --btn-default-press-border:    #94a3b8;
+  --btn-default-disabled-bg:     #f1f5f9;
+  --btn-default-disabled-fg:     #94a3b8;
+  --btn-default-disabled-border: #e2e8f0;
+
+  /* Botón de Peligro / Borrado (Eliminar, Reiniciar) */
+  --btn-danger-bg:               #fadbd8;
+  --btn-danger-fg:               #b03a2e;
+  --btn-danger-border:           #f5b7b1;
+  --btn-danger-hover-bg:         #f5cba7;
+  --btn-danger-hover-fg:         #943126;
+  --btn-danger-hover-border:     #edbb99;
+  --btn-danger-press-bg:         #edbb99;
+  --btn-danger-press-fg:         #78281f;
+  --btn-danger-press-border:     #e59866;
+  --btn-danger-disabled-bg:      #f1f5f9;
+  --btn-danger-disabled-fg:      #94a3b8;
+  --btn-danger-disabled-border:  #e2e8f0;
+
+  /* Modo Cristal / Glass para Botones */
+  --btn-glass-primary-bg:        rgba(var(--primary-rgb), 0.15);
+  --btn-glass-primary-fg:        #107c41;
+  --btn-glass-primary-border:    rgba(var(--primary-rgb), 0.47);
+  --btn-glass-default-bg:        rgba(255, 255, 255, 0.55);
+  --btn-glass-default-fg:        #0f172a;
+  --btn-glass-default-border:    rgba(203, 213, 225, 0.63);
+  --btn-glass-danger-bg:         rgba(245, 203, 167, 0.27);
+  --btn-glass-danger-fg:         #b03a2e;
+  --btn-glass-danger-border:     rgba(208, 90, 63, 0.51);
+
+  /* --------------------------------------------------------------------------
+     9. Tablas y Rejillas de Datos (ModernBrowse)
+     -------------------------------------------------------------------------- */
+  --table-header-bg:        #1e293b; /* Cabecera oscura ejecutiva (Slate 800) */
+  --table-header-fg:        #ffffff; /* Texto blanco en cabecera */
+  --table-header-hover-fg:  #38bdf8; /* Acento celeste en hover (Sky 400) */
+  --table-sort-indicator:   #38bdf8; /* Flecha de ordenación activa */
+  --table-row-even:         #ffffff; /* Fila par blanca */
+  --table-row-odd:          #f8fafc; /* Fila impar sombreada suave (Slate 50) */
+  --table-row-hover:        #f1f5f9; /* Fila bajo el cursor (Slate 100) */
+  --table-row-selected:     #e2e8f0; /* Fila seleccionada (Slate 200) */
+  --table-border:           #e2e8f0; /* Bordes perimetrales de celdas */
+
+  /* --------------------------------------------------------------------------
+     10. Gráficos y Visualización (ModernLineChart)
+     -------------------------------------------------------------------------- */
+  --chart-tooltip-bg:       #ffffff; /* Fondo blanco del tooltip */
+  --chart-tooltip-border:   #107c41; /* Borde verde corporativo */
+  --chart-tooltip-title:    #0f172a; /* Título oscuro */
+  --chart-tooltip-subtitle: #64748b; /* Subtítulo atenuado */
+  --chart-tooltip-divider:  #e2e8f0; /* Línea divisoria */
+  --chart-tooltip-text:     #0f172a; /* Texto principal */
+  --chart-tooltip-muted:    #64748b; /* Texto secundario */
+  --chart-guideline:        #107c41; /* Línea de guía vertical verde */
+  --chart-badge-bg:         #107c41; /* Fondo de pastilla de valor */
+  --chart-badge-text:       #ffffff; /* Texto de pastilla de valor */
+
+  /* --------------------------------------------------------------------------
+     11. Identidad de Usuario y Avatares
+     -------------------------------------------------------------------------- */
+  --avatar-bg:              #e8f0e6; /* Fondo del círculo de avatar (Salvia suave) */
+  --avatar-fg:              #4a5d4e; /* Iniciales o icono del avatar (Salvia oscuro) */
+
+  /* --------------------------------------------------------------------------
+     12. Tarjetas de Métricas KPI Hero (ModernKPICard con franja lateral)
+     -------------------------------------------------------------------------- */
+  --kpi-emerald-accent:     #107c41; /* Verde corporativo xlsJubila */
+  --kpi-emerald-value:      #064e3b; /* Cifra neta destacada */
+  --kpi-emerald-bg:         #ecfdf5; /* Fondo verde menta suave */
+  --kpi-emerald-border:     #a7f3d0; /* Borde verde suave */
+  --kpi-emerald-subtitle:   #065f46; /* Texto descriptivo al pie */
+
+  --kpi-blue-accent:        #1e40af; /* Azul cobalto */
+  --kpi-blue-value:         #1e3a8a; /* Cifra bruta mensual */
+  --kpi-blue-bg:            #eff6ff; /* Fondo azul cielo suave */
+  --kpi-blue-border:        #bfdbfe; /* Borde azul */
+  --kpi-blue-subtitle:      #1e40af; /* Pie azul */
+
+  --kpi-violet-accent:      #818cf8; /* Violeta / Índigo */
+  --kpi-violet-value:       #4338ca; /* Cifra base reguladora */
+  --kpi-violet-bg:          #eef2ff; /* Fondo violeta suave */
+  --kpi-violet-border:      #c7d2fe; /* Borde violeta */
+  --kpi-violet-subtitle:    #4338ca; /* Pie violeta */
+
+  --kpi-amber-accent:       #f59e0b; /* Ámbar / Alerta */
+  --kpi-amber-value:        #92400e; /* Cifra % coeficiente */
+  --kpi-amber-bg:           #fffbeb; /* Fondo ámbar suave */
+  --kpi-amber-border:       #fde68a; /* Borde ámbar */
+  --kpi-amber-subtitle:     #78350f; /* Pie ámbar */
+}

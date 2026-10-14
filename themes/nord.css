@@ -1,0 +1,205 @@
+/* ==========================================================================
+   GoJubila PRO - Tema Nord Ártico (Plantilla Completa de Referencia)
+   ==========================================================================
+   Tema oscuro nórdico basado en la paleta oficial Nord (https://www.nordtheme.com/)
+   Paleta: Polar Night (fondos), Snow Storm (textos), Frost (azules/cian), Aurora (estados).
+   ========================================================================== */
+
+:root {
+  /* Metadatos del Tema */
+  --name: nord;
+  --display-name: "Nord Ártico";
+  --is-dark: true;
+
+  /* --------------------------------------------------------------------------
+     1. Superficies y Fondos Base (Nord Polar Night)
+     -------------------------------------------------------------------------- */
+  --app-background:      #2e3440; /* Fondo principal de ventana (nord0) */
+  --navbar-bg:           #2e3440; /* Fondo de barra superior (nord0) */
+  --card-bg:             #3b4252; /* Fondo de tarjetas de contenido (nord1) */
+  --card-border:         #4c566a; /* Borde de tarjetas y paneles (nord3) */
+  --sidebar-bg:          #2e3440; /* Fondo del menú lateral (nord0) */
+  --sidebar-shaded-bg:   #242933; /* Fondo sombreado o secundario */
+  --filter-drawer-bg:    #2e3440; /* Fondo del cajón lateral de filtros */
+  --inset-panel-bg:      #434c5e; /* Fondo de paneles incrustados (nord2) */
+
+  /* --------------------------------------------------------------------------
+     2. Bordes y Divisores
+     -------------------------------------------------------------------------- */
+  --border:              #4c566a; /* Bordes estructurales generales (nord3) */
+  --divider:             #434c5e; /* Líneas divisorias horizontales (nord2) */
+
+  /* --------------------------------------------------------------------------
+     3. Tipografía General (Nord Snow Storm)
+     -------------------------------------------------------------------------- */
+  --text-primary:        #eceff4; /* Texto principal nítido (nord6) */
+  --text-muted:          #d8dee9; /* Texto secundario y atenuado (nord4) */
+  --nav-inactive-fg:     #81a1c1; /* Texto de pestañas o botones inactivos (nord9) */
+
+  /* --------------------------------------------------------------------------
+     4. Tokens Semánticos de Estado (Nord Frost & Aurora)
+     -------------------------------------------------------------------------- */
+  --accent:              #88c0d0; /* Acento primario cian escarchado (nord8) */
+  --success:             #a3be8c; /* Verde aurora para éxito o cumplimiento (nord14) */
+  --warning:             #ebcb8b; /* Amarillo aurora para avisos y demoras (nord13) */
+  --danger:              #bf616a; /* Rojo aurora para penalizaciones o error (nord11) */
+
+  /* --------------------------------------------------------------------------
+     5. Controles e Inputs
+     -------------------------------------------------------------------------- */
+  --input-bg:            #3b4252; /* Fondo de campos de entrada (nord1) */
+  --input-border:        #4c566a; /* Borde en reposo (nord3) */
+  --hover:               #434c5e; /* Fondo hover interactivo (nord2) */
+  --selection:           #5e81ac; /* Fondo de selección activa (nord10) */
+  --disabled:            #4c566a; /* Color de controles desactivados */
+  --disabled-button:     #3b4252; /* Fondo de botones desactivados */
+
+  /* --------------------------------------------------------------------------
+     6. Cabecera Ejecutiva (ModernHeaderCard / Banner con Degradado)
+     -------------------------------------------------------------------------- */
+  --header-banner-top:      #2e3440; /* Color superior del degradado (nord0) */
+  --header-banner-bottom:   #3b4252; /* Color inferior del degradado (nord1) */
+  --header-banner-divider:  #434c5e; /* Línea divisoria inferior */
+  --header-body-bg:         #3b4252; /* Fondo del cuerpo inferior de la tarjeta */
+  --header-border:          #4c566a; /* Borde perimetral exterior */
+  --header-title:           #eceff4; /* Título principal del banner (nord6) */
+  --header-subtitle:        rgba(136, 192, 208, 0.90); /* Subtítulo cian con opacidad (nord8) */
+
+  /* --------------------------------------------------------------------------
+     7. Insignias y Pastillas de Estado (ModernBadge)
+     -------------------------------------------------------------------------- */
+  /* Éxito (Success / Cumple Requisitos) */
+  --badge-success-bg:       rgba(163, 190, 140, 0.22);
+  --badge-success-text:     #a3be8c;
+  --badge-success-border:   #a3be8c;
+
+  /* Peligro (Danger / Penalización / Invalidez) */
+  --badge-danger-bg:        rgba(191, 97, 106, 0.22);
+  --badge-danger-text:      #bf616a;
+  --badge-danger-border:    #bf616a;
+
+  /* Información (Info / Años Cotizados / Régimen) */
+  --badge-info-bg:          rgba(136, 192, 208, 0.22);
+  --badge-info-text:        #88c0d0;
+  --badge-info-border:      #88c0d0;
+
+  /* Advertencia (Warning / Demora / Alerta) */
+  --badge-warning-bg:       rgba(235, 203, 139, 0.22);
+  --badge-warning-text:     #ebcb8b;
+  --badge-warning-border:   #ebcb8b;
+
+  /* Púrpura (Purple / Método Dual / Comparativa) */
+  --badge-purple-bg:        rgba(180, 142, 173, 0.22);
+  --badge-purple-text:      #b48ead;
+  --badge-purple-border:    #b48ead;
+
+  /* Neutro (Neutral / Inactivo / Informativo) */
+  --badge-neutral-bg:       #434c5e;
+  --badge-neutral-text:     #d8dee9;
+  --badge-neutral-border:   #4c566a;
+
+  /* --------------------------------------------------------------------------
+     8. Botones de Acción (ModernButton)
+     -------------------------------------------------------------------------- */
+  /* Botón Primario (Calcular, Guardar, Acción principal) */
+  --btn-primary-bg:              #88c0d0;
+  --btn-primary-fg:              #2e3440;
+  --btn-primary-border:          #81a1c1;
+  --btn-primary-hover-bg:        #8fbcbb;
+  --btn-primary-hover-fg:        #2e3440;
+  --btn-primary-hover-border:    #88c0d0;
+  --btn-primary-press-bg:        #5e81ac;
+  --btn-primary-press-fg:        #eceff4;
+  --btn-primary-press-border:    #4c566a;
+  --btn-primary-disabled-bg:     #3b4252;
+  --btn-primary-disabled-fg:     #4c566a;
+  --btn-primary-disabled-border: #434c5e;
+
+  /* Botón Estándar (Cancelar, Examinar, Filtrar) */
+  --btn-default-bg:              #434c5e;
+  --btn-default-fg:              #eceff4;
+  --btn-default-border:          #4c566a;
+  --btn-default-hover-bg:        #4c566a;
+  --btn-default-hover-fg:        #eceff4;
+  --btn-default-hover-border:    #5e81ac;
+  --btn-default-press-bg:        #3b4252;
+  --btn-default-press-fg:        #eceff4;
+  --btn-default-press-border:    #4c566a;
+  --btn-default-disabled-bg:     #2e3440;
+  --btn-default-disabled-fg:     #4c566a;
+  --btn-default-disabled-border: #3b4252;
+
+  /* Botón de Peligro (Eliminar, Reiniciar) */
+  --btn-danger-bg:               #434c5e;
+  --btn-danger-fg:               #bf616a;
+  --btn-danger-border:           #bf616a;
+  --btn-danger-hover-bg:         #bf616a;
+  --btn-danger-hover-fg:         #eceff4;
+  --btn-danger-hover-border:     #d08770;
+  --btn-danger-press-bg:         #3b4252;
+  --btn-danger-press-fg:         #bf616a;
+  --btn-danger-press-border:     #bf616a;
+  --btn-danger-disabled-bg:      #2e3440;
+  --btn-danger-disabled-fg:      #4c566a;
+  --btn-danger-disabled-border:  #3b4252;
+
+  /* --------------------------------------------------------------------------
+     9. Tablas y Rejillas de Datos (ModernBrowse)
+     -------------------------------------------------------------------------- */
+  --table-header-bg:        #2e3440; /* Cabecera con fondo polar oscuro */
+  --table-header-fg:        #eceff4; /* Texto de cabecera níveo */
+  --table-header-hover-fg:  #88c0d0; /* Texto hover cian */
+  --table-sort-indicator:   #88c0d0; /* Flecha de ordenación activa */
+  --table-row-even:         #3b4252; /* Fila par */
+  --table-row-odd:          #2e3440; /* Fila impar */
+  --table-row-hover:        #434c5e; /* Fila al pasar el ratón */
+  --table-row-selected:     #5e81ac; /* Fila seleccionada */
+  --table-border:           #4c566a; /* Bordes perimetrales y celdas */
+
+  /* --------------------------------------------------------------------------
+     10. Gráficos y Visualización (ModernLineChart)
+     -------------------------------------------------------------------------- */
+  --chart-tooltip-bg:       #2e3440; /* Fondo polar oscuro del tooltip */
+  --chart-tooltip-border:   #88c0d0; /* Borde cian escarchado */
+  --chart-tooltip-title:    #eceff4; /* Título principal */
+  --chart-tooltip-subtitle: #d8dee9; /* Subtítulo */
+  --chart-tooltip-divider:  #434c5e; /* Separador */
+  --chart-tooltip-text:     #eceff4; /* Texto principal */
+  --chart-tooltip-muted:    #d8dee9; /* Texto secundario */
+  --chart-guideline:        #81a1c1; /* Línea guía de rastreo */
+  --chart-badge-bg:         #2e3440; /* Fondo de pastilla de eje */
+  --chart-badge-text:       #eceff4; /* Texto de pastilla de eje */
+
+  /* --------------------------------------------------------------------------
+     11. Identidad de Usuario y Avatares
+     -------------------------------------------------------------------------- */
+  --avatar-bg:              #434c5e; /* Fondo circular del avatar */
+  --avatar-fg:              #88c0d0; /* Letras o icono del avatar */
+
+  /* --------------------------------------------------------------------------
+     12. Tarjetas de Métricas KPI Hero (ModernKPICard)
+     -------------------------------------------------------------------------- */
+  --kpi-emerald-accent:     #a3be8c;
+  --kpi-emerald-value:      #a3be8c;
+  --kpi-emerald-bg:         #2e3440;
+  --kpi-emerald-border:     #4c566a;
+  --kpi-emerald-subtitle:   #d8dee9;
+
+  --kpi-blue-accent:        #81a1c1;
+  --kpi-blue-value:         #81a1c1;
+  --kpi-blue-bg:            #2e3440;
+  --kpi-blue-border:        #4c566a;
+  --kpi-blue-subtitle:      #d8dee9;
+
+  --kpi-violet-accent:      #b48ead;
+  --kpi-violet-value:       #b48ead;
+  --kpi-violet-bg:          #2e3440;
+  --kpi-violet-border:      #4c566a;
+  --kpi-violet-subtitle:    #d8dee9;
+
+  --kpi-amber-accent:       #ebcb8b;
+  --kpi-amber-value:        #ebcb8b;
+  --kpi-amber-bg:           #2e3440;
+  --kpi-amber-border:       #4c566a;
+  --kpi-amber-subtitle:     #d8dee9;
+}
