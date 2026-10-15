@@ -169,7 +169,24 @@ func main() {
 	)
 
 	// -------------------------------------------------------------------------
-	// 7. Selector de Fechas (ModernDatePicker)
+	// 7. Filtros Desplegables Tipo Pastilla (ModernChipFilter)
+	// -------------------------------------------------------------------------
+	chipYear := uikit.NewChipFilter("Año:", []string{"Todos los años", "2026", "2025", "2024", "2023"}, "Todos los años", func(sel string) {
+		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, "Filtro activo: "+sel)
+	})
+
+	chipStatus := uikit.NewChipFilter("Estado:", []string{"Todos", "Activo", "Pendiente", "Archivado"}, "Todos", func(sel string) {
+		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, "Estado filtrado: "+sel)
+	})
+
+	chipFiltersRow := container.NewHBox(
+		widget.NewLabel("Filtros Interactivos:"),
+		chipYear,
+		chipStatus,
+	)
+
+	// -------------------------------------------------------------------------
+	// 8. Selector de Fechas (ModernDatePicker)
 	// -------------------------------------------------------------------------
 	datePicker := uikit.NewModernDatePicker(time.Now(), func(t time.Time) {
 		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, "Fecha seleccionada: "+t.Format("02/01/2006"))
@@ -214,8 +231,8 @@ func main() {
 	))
 
 	cardBadges := uikit.NewCard(container.NewVBox(
-		uikit.NewSectionTitle("Insignias, Interruptores & Fechas (Badges, Switches & DatePicker)"),
-		container.NewVBox(badgesRow, datePickerRow),
+		uikit.NewSectionTitle("Insignias, Filtros, Interruptores & Fechas"),
+		container.NewVBox(badgesRow, chipFiltersRow, datePickerRow),
 	))
 
 	content := container.NewVBox(
