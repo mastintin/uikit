@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 )
 
@@ -210,4 +211,45 @@ func TestModernDatePicker_ThemeChangeUpdatesButtons(t *testing.T) {
 		t.Errorf("Expected restored bg %s, got %s", lightBg, restoredBg)
 	}
 }
+
+func TestCalculateSmartPopupPosition_FlipUp(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+
+	target := canvas.NewRectangle(nil)
+	target.SetMinSize(fyne.NewSize(150, 36))
+	target.Resize(fyne.NewSize(150, 36))
+
+	w := a.NewWindow("Test Smart Popup")
+	defer w.Close()
+
+	root := container.NewWithoutLayout(target)
+	w.SetContent(root)
+	w.Resize(fyne.NewSize(800, 600))
+	c := w.Canvas()
+
+	// Caso 1: Target en la parte inferior de la ventana (ej. Y = 520)
+	target.Move(fyne.NewPos(100, 520))
+	popupSize := fyne.NewSize(280, 290)
+
+	t.Logf("Canvas Size: %v, Target Size: %v, Target Pos: %v", c.Size(), target.Size(), target.Position())
+
+	posBottom := calculateSmartPopupPosition(c, target, popupSize)
+	// Debe recolocarse HACIA ARRIBA (posY < target.Position().Y)
+	if posBottom.Y >= target.Position().Y {
+		t.Errorf("Expected popup to flip UP above %v, got Y = %v", target.Position().Y, posBottom.Y)
+	}
+	if posBottom.Y < 4 {
+		t.Errorf("Expected popup Y to be within screen bounds, got %v", posBottom.Y)
+	}
+
+	// Caso 2: Target en la parte superior de la ventana (ej. Y = 50)
+	target.Move(fyne.NewPos(100, 50))
+	posTop := calculateSmartPopupPosition(c, target, popupSize)
+	// Debe abrirse HACIA ABAJO (posY > 50 + 36)
+	if posTop.Y < 50+36 {
+		t.Errorf("Expected popup to open DOWN below target, got Y = %v", posTop.Y)
+	}
+}
+
 

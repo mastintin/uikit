@@ -302,8 +302,69 @@ func isSameDay(a, b time.Time) bool {
 	return a.Year() == b.Year() && a.Month() == b.Month() && a.Day() == b.Day()
 }
 
+// calculateSmartPopupPosition determina la mejor posición en pantalla para el PopUp flotante,
+// recolocándolo inteligentemente hacia arriba (flip-up) si el control está en la parte inferior
+// y ajustando los límites horizontales para evitar que quede oculto fuera de la ventana.
+func calculateSmartPopupPosition(canvas fyne.Canvas, target fyne.CanvasObject, popupSize fyne.Size) fyne.Position {
+	var targetPos fyne.Position
+	if app := fyne.CurrentApp(); app != nil && app.Driver() != nil {
+		if c := app.Driver().CanvasForObject(target); c != nil {
+			targetPos = app.Driver().AbsolutePositionForObject(target)
+		} else {
+			targetPos = target.Position()
+		}
+	} else {
+		targetPos = target.Position()
+	}
+
+	targetSize := target.Size()
+	canvasSize := canvas.Size()
+
+	if popupSize.Width <= 0 {
+		popupSize.Width = 280
+	}
+	if popupSize.Height <= 0 {
+		popupSize.Height = 290
+	}
+
+	// 1. Espacio vertical disponible
+	targetBottomY := targetPos.Y + targetSize.Height
+	spaceBelow := canvasSize.Height - (targetBottomY + 4)
+	spaceAbove := targetPos.Y - 4
+
+	var posY float32
+	// Si NO cabe hacia abajo y hay más espacio arriba que abajo, recolocar HACIA ARRIBA (flip-up)
+	if spaceBelow < popupSize.Height && spaceAbove > spaceBelow {
+		posY = targetPos.Y - popupSize.Height - 4
+		if posY < 4 {
+			posY = 4
+		}
+	} else {
+		// Abre hacia abajo
+		posY = targetBottomY + 4
+		if posY+popupSize.Height > canvasSize.Height-4 {
+			posY = canvasSize.Height - popupSize.Height - 4
+		}
+		if posY < 4 {
+			posY = 4
+		}
+	}
+
+	// 2. Control de límites horizontales
+	posX := targetPos.X
+	if posX+popupSize.Width > canvasSize.Width-8 {
+		posX = canvasSize.Width - popupSize.Width - 8
+	}
+	if posX < 8 {
+		posX = 8
+	}
+
+	return fyne.NewPos(posX, posY)
+}
+
 // ShowCalendarPopup abre el calendario en un PopUp flotante en el lienzo del canvas dado
-// o relativo al objeto objetivo (target).
+// o relativo al objeto objetivo (target), recolocándose automáticamente hacia arriba o abajo
+// según el espacio disponible en la pantalla.
 func ShowCalendarPopup(canvas fyne.Canvas, target fyne.CanvasObject, initialDate time.Time, onSelect func(time.Time)) *widget.PopUp {
 	if canvas == nil {
 		return nil
@@ -324,7 +385,12 @@ func ShowCalendarPopup(canvas fyne.Canvas, target fyne.CanvasObject, initialDate
 	cal.popup = p
 
 	if target != nil {
-		p.ShowAtRelativePosition(fyne.NewPos(0, target.Size().Height+4), target)
+		popSize := p.MinSize()
+		if popSize.Height <= 0 {
+			popSize = cal.MinSize()
+		}
+		pos := calculateSmartPopupPosition(canvas, target, popSize)
+		p.ShowAtPosition(pos)
 	} else {
 		p.Show()
 	}
