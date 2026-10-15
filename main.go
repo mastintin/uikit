@@ -480,47 +480,47 @@ func main() {
 		widget.NewSeparator(),
 	))
 
-	// Botones de Navegación del Sidebar
-	var navBtns []*uikit.ModernButton
-	addNav := func(title string, ic fyne.Resource, action func()) *uikit.ModernButton {
-		var btn *uikit.ModernButton
-		btn = uikit.NewButton("Default", title, ic, false, func() {
+	// Botones de Navegación del Sidebar con el estilo ejecutivo de gofyneJubila
+	var navBtns []*uikit.ModernSidebarNavButton
+	addNav := func(title, iconName string, action func()) *uikit.ModernSidebarNavButton {
+		var btn *uikit.ModernSidebarNavButton
+		btn = uikit.NewSidebarNavButton(title, iconName, func() {
 			for _, b := range navBtns {
-				b.SetVariant(uikit.ButtonDefault)
+				b.SetActive(false)
 			}
-			btn.SetVariant(uikit.ButtonPrimary)
+			btn.SetActive(true)
 			action()
 		})
 		navBtns = append(navBtns, btn)
 		return btn
 	}
 
-	btnAll := addNav("Vista Completa", theme.HomeIcon(), func() {
+	btnAll := addNav("Vista Completa", "home", func() {
 		setView(allContent)
 	})
-	btnAll.SetVariant(uikit.ButtonPrimary) // Seleccionado por defecto
+	btnAll.SetActive(true) // Seleccionado por defecto con barra de acento
 
-	btnThemesView := addNav("Temas & Estilos CSS", theme.ColorPaletteIcon(), func() {
+	btnThemesView := addNav("Temas & Estilos CSS", "sliders", func() {
 		setView(container.NewVBox(header, cardThemeManager))
 	})
 
-	btnKPI := addNav("Métricas & KPIs", theme.ComputerIcon(), func() {
+	btnKPI := addNav("Métricas & KPIs", "trending-up", func() {
 		setView(container.NewVBox(header, cardThemeManager, cardKPIs))
 	})
 
-	btnBtns := addNav("Botones & Carga", theme.MediaPlayIcon(), func() {
+	btnBtns := addNav("Botones & Carga", "play", func() {
 		setView(container.NewVBox(header, cardThemeManager, cardButtons))
 	})
 
-	btnSliders := addNav("Deslizadores (Sliders)", theme.MoveDownIcon(), func() {
+	btnSliders := addNav("Deslizadores (Sliders)", "sliders", func() {
 		setView(container.NewVBox(header, cardThemeManager, cardSliders))
 	})
 
-	btnSpin := addNav("Indicadores (Spinners)", theme.ViewRefreshIcon(), func() {
+	btnSpin := addNav("Indicadores (Spinners)", "refresh", func() {
 		setView(container.NewVBox(header, cardThemeManager, cardSpinners))
 	})
 
-	btnChips := addNav("Filtros & Insignias", theme.MenuIcon(), func() {
+	btnChips := addNav("Filtros & Insignias", "filter", func() {
 		setView(container.NewVBox(header, cardThemeManager, cardBadgesAndFilters))
 	})
 
