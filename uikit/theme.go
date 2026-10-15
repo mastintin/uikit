@@ -450,6 +450,21 @@ func CreateThemeByName(name string) *AppTheme {
 	}
 }
 
+// RefreshTree recorre en profundidad el árbol de CanvasObjects invocando Refresh()
+// en cada widget y contenedor, asegurando que todos los componentes reactivos
+// actualicen sus paletas de color, bordes, estados y fuentes tras un cambio de tema en vivo.
+func RefreshTree(obj fyne.CanvasObject) {
+	if obj == nil {
+		return
+	}
+	obj.Refresh()
+	if c, ok := obj.(*fyne.Container); ok {
+		for _, child := range c.Objects {
+			RefreshTree(child)
+		}
+	}
+}
+
 // SetAppTheme aplica el tema globalmente en vivo (en caliente) y persiste la selección en preferencias.
 func SetAppTheme(name string) *AppTheme {
 	th := CreateThemeByName(name)
@@ -458,6 +473,13 @@ func SetAppTheme(name string) *AppTheme {
 		app.Settings().SetTheme(th)
 		if prefs := app.Preferences(); prefs != nil {
 			prefs.SetString("app_theme", th.Name())
+		}
+		if drv := app.Driver(); drv != nil {
+			for _, win := range drv.AllWindows() {
+				if c := win.Content(); c != nil {
+					RefreshTree(c)
+				}
+			}
 		}
 	}
 	RefreshAllDatePickers()

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -17,12 +18,44 @@ import (
 
 func main() {
 	myApp := app.NewWithID("com.uikit.showcase")
-	myWindow := myApp.NewWindow("UIKit Component Gallery - Fyne 2.8")
-	myWindow.Resize(fyne.NewSize(1240, 850))
+	myWindow := myApp.NewWindow("UIKit Component Gallery & CSS Themes - Fyne 2.8")
+	myWindow.Resize(fyne.NewSize(1260, 860))
 
-	// Configurar tema claro por defecto
-	currentTheme := uikit.NewAppTheme()
-	myApp.Settings().SetTheme(currentTheme)
+	// -------------------------------------------------------------------------
+	// 0. Carga e Inicialización de Temas CSS Externos
+	// -------------------------------------------------------------------------
+	uikit.LoadAndRegisterExternalThemesDetailed("themes")
+	uikit.SetAppTheme(uikit.ThemeLight)
+
+	// Fondo de aplicación reactivo al tema
+	appBg := canvas.NewRectangle(uikit.ThemeColor(uikit.ColorNameAppBackground))
+
+	// Helper para obtener la lista de temas y sus nombres descriptivos
+	getThemesList := func() ([]string, map[string]string, string) {
+		var displayList []string
+		idMap := make(map[string]string)
+		currName := uikit.GetCurrentThemeName()
+		currentDisplay := "Claro (Light)"
+
+		for _, id := range uikit.AvailableThemes() {
+			name := id
+			if p := uikit.GetThemePalette(id); p != nil && p.DisplayName != "" {
+				name = p.DisplayName
+			} else if id == uikit.ThemeLight {
+				name = "Claro (Light)"
+			} else if id == uikit.ThemeDark {
+				name = "Oscuro (Dark)"
+			}
+			displayList = append(displayList, name)
+			idMap[name] = id
+			if id == currName {
+				currentDisplay = name
+			}
+		}
+		return displayList, idMap, currentDisplay
+	}
+
+	themeDisplays, themeMap, currentDisplay := getThemesList()
 
 	// -------------------------------------------------------------------------
 	// 1. Cabecera Principal (HeaderCard con título degradado)
@@ -195,6 +228,8 @@ func main() {
 		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, "Estado filtrado: "+sel)
 	})
 
+	var chipThemeTop *uikit.ModernChipFilter
+
 	chipFiltersRow := container.NewHBox(
 		widget.NewLabel("Filtros Interactivos:"),
 		chipYear,
@@ -254,7 +289,7 @@ func main() {
 			layout.NewSpacer(),
 			badgeVersion,
 		),
-		uikit.NewCaptionLabel("Catálogo Oficial de Componentes", uikit.ThemeColor(uikit.ColorNameTextMuted)),
+		uikit.NewCaptionLabel("Catálogo Oficial & Gestor CSS", uikit.ThemeColor(uikit.ColorNameTextMuted)),
 		widget.NewSeparator(),
 	))
 
@@ -307,29 +342,102 @@ func main() {
 		btnChips,
 	)
 
-	// Controles del Footer del Sidebar
-	switchTheme := uikit.NewSwitch("Modo Oscuro", false, func(dark bool) {
-		if dark {
-			myApp.Settings().SetTheme(uikit.NewDarkTheme())
+	// -------------------------------------------------------------------------
+	// 11. Selector y Gestor de Temas CSS en Vivo
+	// -------------------------------------------------------------------------
+	var sidebarThemeSelect *widget.Select
+	var sidebar *uikit.ModernSidebar
+
+	applyTheme := func(themeID string, showFeedback bool) {
+		th := uikit.SetAppTheme(themeID)
+
+		// 1. Fondo de la ventana sincronizado
+		appBg.FillColor = uikit.ThemeColor(uikit.ColorNameAppBackground)
+		appBg.Refresh()
+
+		// 2. Elementos gráficos personalizados del sidebar
+		lblBrand.Color = uikit.ThemeColor(uikit.ColorNameTextPrimary)
+		lblBrand.Refresh()
+
+		// 3. Refrescar recursivamente todo el árbol de controles
+		uikit.RefreshTree(myWindow.Content())
+		myWindow.Content().Refresh()
+
+		// 4. Sincronizar selectores
+		_, _, disp := getThemesList()
+		if sidebarThemeSelect != nil && sidebarThemeSelect.Selected != disp {
+			sidebarThemeSelect.Selected = disp
+			sidebarThemeSelect.Refresh()
+		}
+		if chipThemeTop != nil && chipThemeTop.Selected() != disp {
+			chipThemeTop.SetSelectedSilent(disp)
+		}
+
+		if showFeedback {
+			displayName := th.Name()
+			if pal := uikit.GetThemePalette(themeID); pal != nil && pal.DisplayName != "" {
+				displayName = pal.DisplayName
+			}
+			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastSuccess, fmt.Sprintf("Tema aplicado: %s", displayName))
+		}
+	}
+
+	sidebarThemeSelect = widget.NewSelect(themeDisplays, func(selected string) {
+		if id, ok := themeMap[selected]; ok {
+			applyTheme(id, true)
+		}
+	})
+	sidebarThemeSelect.Selected = currentDisplay
+
+	// Chip Filter en la barra de filtros superior para alternar temas directamente
+	chipThemeTop = uikit.NewChipFilter("Tema CSS:", themeDisplays, currentDisplay, func(selected string) {
+		if id, ok := themeMap[selected]; ok {
+			applyTheme(id, true)
+		}
+	})
+	chipFiltersRow.Add(chipThemeTop)
+
+	btnReloadThemes := uikit.NewButton("Primary", "Recargar Temas CSS", theme.ViewRefreshIcon(), false, func() {
+		report := uikit.LoadAndRegisterExternalThemesDetailed("themes")
+		td, tm, cur := getThemesList()
+		themeDisplays = td
+		themeMap = tm
+
+		sidebarThemeSelect.Options = themeDisplays
+		sidebarThemeSelect.Selected = cur
+		sidebarThemeSelect.Refresh()
+
+		chipThemeTop.SetOptions(themeDisplays)
+		chipThemeTop.SetSelectedSilent(cur)
+
+		applyTheme(uikit.GetCurrentThemeName(), false)
+
+		if len(report.Errors) > 0 {
+			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastDanger, fmt.Sprintf("Error CSS: %s", report.Errors[0]))
 		} else {
-			myApp.Settings().SetTheme(uikit.NewLightTheme())
+			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastSuccess, fmt.Sprintf("%d temas CSS registrados en caliente", report.Count))
 		}
 	})
 
-	switchGlass := uikit.NewSwitch("Efecto Cristal", false, func(active bool) {
+	switchGlass := uikit.NewSwitch("Efecto Cristal (Glass)", false, func(active bool) {
 		uikit.SetGlobalGlassButtons(active)
+		uikit.RefreshTree(myWindow.Content())
+		myWindow.Content().Refresh()
 	})
 
 	sidebarFooter := container.NewPadded(container.NewVBox(
 		widget.NewSeparator(),
-		switchTheme,
+		uikit.NewCaptionLabel("TEMA VISUAL & CSS:", uikit.ThemeColor(uikit.ColorNameTextMuted)),
+		sidebarThemeSelect,
+		uiSpacer(1, 4),
+		btnReloadThemes,
 		switchGlass,
 		container.NewCenter(uikit.NewCaptionLabel("Fyne 2.8 • Modern UI Toolkit", uikit.ThemeColor(uikit.ColorNameTextMuted))),
 	))
 
 	// Sidebar contenedor nativo UIKit
-	sidebar := uikit.NewSidebarContainer(
-		250,
+	sidebar = uikit.NewSidebarContainer(
+		255,
 		sidebarHeader,
 		container.NewPadded(sidebarNavList),
 		sidebarFooter,
@@ -342,6 +450,27 @@ func main() {
 		container.NewPadded(scrollArea),
 	)
 
-	myWindow.SetContent(mainLayout)
+	// Envolver con fondo nativo
+	rootStack := container.NewStack(appBg, mainLayout)
+	myWindow.SetContent(rootStack)
+
+	// Iniciar vigía de temas CSS en segundo plano (ThemeWatcher)
+	watcher := uikit.NewThemeWatcher("themes", func(filePath string) {
+		uikit.LoadAndRegisterExternalThemesDetailed("themes")
+		applyTheme(uikit.GetCurrentThemeName(), false)
+		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, fmt.Sprintf("Tema CSS recargado en vivo (%s)", filepath.Base(filePath)))
+	})
+	watcher.Start()
+
+	myWindow.SetOnClosed(func() {
+		watcher.Stop()
+	})
+
 	myWindow.ShowAndRun()
+}
+
+func uiSpacer(w, h float32) fyne.CanvasObject {
+	rect := canvas.NewRectangle(nil)
+	rect.SetMinSize(fyne.NewSize(w, h))
+	return rect
 }
