@@ -43,7 +43,7 @@ func NewLightPalette() *ThemePalette {
 		Danger:  ColorWarningFg,
 
 		// Controles e Inputs
-		InputBackground: ColorWhite,
+		InputBackground: ColorSlate200, // #e2e8f0: contraste nítido sobre tarjetas blancas para sliders y barras
 		InputBorder:     ColorSlate300,
 		Selection:       ColorBlue100, // #dbeafe
 		Hover:           ColorSlate100,

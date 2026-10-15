@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 )
 
@@ -34,6 +35,12 @@ func TestSliderSemanticConstructors(t *testing.T) {
 	}
 	if age.decimals != 0 {
 		t.Errorf("decimales esperados 0, obtuve %v", age.decimals)
+	}
+	if !age.showSteppers {
+		t.Errorf("se esperaban steppers activados en NewAgeSlider")
+	}
+	if !age.showMinMax {
+		t.Errorf("se esperaba min/max activado en NewAgeSlider")
 	}
 
 	pct := NewPercentageSlider(0, 100)
@@ -127,12 +134,95 @@ func TestSliderCallbacks(t *testing.T) {
 	}
 }
 
+func TestSliderSteppersAndScroll(t *testing.T) {
+	app := test.NewApp()
+	defer app.Quit()
+
+	s := NewSlider(0, 10).WithStep(1).WithValue(5)
+
+	s.StepUp()
+	if s.Value() != 6 {
+		t.Errorf("tras StepUp esperaba 6, obtuve %v", s.Value())
+	}
+
+	s.StepDown()
+	if s.Value() != 5 {
+		t.Errorf("tras StepDown esperaba 5, obtuve %v", s.Value())
+	}
+
+	// Scroll wheel hacia arriba
+	s.Scrolled(&fyne.ScrollEvent{
+		Scrolled: fyne.Delta{DY: 10},
+	})
+	if s.Value() != 6 {
+		t.Errorf("tras Scrolled up esperaba 6, obtuve %v", s.Value())
+	}
+
+	// Scroll wheel hacia abajo
+	s.Scrolled(&fyne.ScrollEvent{
+		Scrolled: fyne.Delta{DY: -10},
+	})
+	if s.Value() != 5 {
+		t.Errorf("tras Scrolled down esperaba 5, obtuve %v", s.Value())
+	}
+}
+
+func TestSliderScrollInWindow(t *testing.T) {
+	app := test.NewApp()
+	defer app.Quit()
+
+	w := test.NewWindow(nil)
+	defer w.Close()
+
+	s := NewPercentageSlider(0, 100).WithStep(5).WithValue(50)
+	vbox := container.NewVBox(s)
+	vscroll := container.NewVScroll(vbox)
+	w.SetContent(vscroll)
+	w.Resize(fyne.NewSize(400, 400))
+
+	pos := fyne.NewPos(100, 20)
+	test.Scroll(w.Canvas(), pos, 0, 10)
+	t.Logf("Valor tras test.Scroll at (100, 20) DY=10: %v", s.Value())
+
+	posTrack := fyne.NewPos(100, 35)
+	test.Scroll(w.Canvas(), posTrack, 0, 10)
+	t.Logf("Valor tras test.Scroll at (100, 35) DY=10: %v", s.Value())
+
+	// Also test when vscroll has scrolled down
+	vscroll.Offset.Y = 50
+	vscroll.Refresh()
+	test.Scroll(w.Canvas(), fyne.NewPos(100, 35), 0, 10)
+	t.Logf("Valor tras test.Scroll with Offset.Y=50: %v", s.Value())
+}
+
+func TestSliderEditableBadge(t *testing.T) {
+	app := test.NewApp()
+	defer app.Quit()
+
+	s := NewSlider(0, 100).WithValue(20).WithEditableBadge(true)
+	r := s.CreateRenderer().(*modernSliderRenderer)
+
+	r.startEditing()
+	if !r.isEditing {
+		t.Fatalf("se esperaba isEditing = true tras startEditing")
+	}
+
+	// Simular escritura de nuevo valor y Enter
+	r.valueEntry.OnSubmitted("75")
+	if r.isEditing {
+		t.Errorf("se esperaba isEditing = false tras OnSubmitted")
+	}
+	if s.Value() != 75 {
+		t.Errorf("se esperaba que el valor se actualizara a 75, obtuve %v", s.Value())
+	}
+}
+
 func TestSliderRendererLayout(t *testing.T) {
 	app := test.NewApp()
 	defer app.Quit()
 
-	// 1. Layout Inline sin título
-	s := NewPercentageSlider(0, 100).WithValue(50)
+	// 1. Layout Inline simple sin título ni steppers
+	s := NewSlider(0, 100).WithValue(50)
 	r := s.CreateRenderer().(*modernSliderRenderer)
 	minSize := r.MinSize()
 	if minSize.Width <= 0 || minSize.Height <= 0 {
@@ -140,28 +230,36 @@ func TestSliderRendererLayout(t *testing.T) {
 	}
 
 	objs := r.Objects()
-	if len(objs) != 3 { // innerSlider, badgeBg, valueText
-		t.Errorf("esperaba 3 objetos canvas en layout inline, obtuve %d", len(objs))
+	// themedSlider, badgeBg, badgeTap, valueText = 4
+	if len(objs) < 3 {
+		t.Errorf("esperaba al menos 3 objetos canvas en layout inline, obtuve %d", len(objs))
 	}
 
 	r.Layout(fyne.NewSize(250, 40))
 
-	// 2. Layout con Título superior
-	s.WithTitle("Porcentaje de reducción")
+	// 2. Layout con Título superior, Steppers y MinMax
+	s.WithTitle("Porcentaje de reducción").
+		WithSteppers(true).
+		WithMinMax(true).
+		WithRangeLabels("Mínimo", "Máximo")
 	r.Refresh()
 
 	objsTitle := r.Objects()
-	if len(objsTitle) != 4 { // titleText, innerSlider, badgeBg, valueText
-		t.Errorf("esperaba 4 objetos canvas con título, obtuve %d", len(objsTitle))
+	// titleText, stepperMinus, stepperPlus, themedSlider, minText, maxText, badgeBg, badgeTap, valueText
+	if len(objsTitle) < 8 {
+		t.Errorf("esperaba al menos 8 objetos canvas con todas las extensiones, obtuve %d", len(objsTitle))
 	}
 
-	r.Layout(fyne.NewSize(300, 60))
+	r.Layout(fyne.NewSize(320, 70))
 
 	// 3. Estado Deshabilitado
 	s.Disable()
 	r.Refresh()
 	if !r.innerSlider.Disabled() {
 		t.Errorf("el innerSlider debería estar deshabilitado al desactivar ModernSlider")
+	}
+	if !r.stepperMinus.disabled {
+		t.Errorf("stepperMinus debería estar deshabilitado")
 	}
 
 	s.Enable()

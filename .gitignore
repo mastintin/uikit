@@ -5,6 +5,7 @@
 *.so
 *.dylib
 demoApp
+uikit-demo
 
 # Test binary, built with `go test -c`
 *.test
