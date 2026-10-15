@@ -79,3 +79,13 @@ func TestTheme_SwitchingHelpers(t *testing.T) {
 	}
 	_ = app
 }
+
+func TestLoadExternalThemesFromThemesDir(t *testing.T) {
+	res := LoadAndRegisterExternalThemesDetailed("../themes")
+	if res.Count < 3 {
+		t.Errorf("Esperaba al menos 3 temas externos, obtuve %d (errores: %v)", res.Count, res.Errors)
+	}
+	themes := AvailableThemes()
+	t.Logf("Temas disponibles tras escanear ../themes: %v", themes)
+}
+

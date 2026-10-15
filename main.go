@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -16,15 +17,61 @@ import (
 	"uikit-demo/uikit"
 )
 
+// findThemesDir resuelve de forma ultra-robusta la ubicación de la carpeta "themes"
+// independientemente de si se ejecuta desde terminal, Finder, IDE o subdirectorios.
+func findThemesDir() string {
+	// 1. Comprobar ruta directa en el directorio de trabajo actual
+	if stat, err := os.Stat("themes"); err == nil && stat.IsDir() {
+		if abs, err := filepath.Abs("themes"); err == nil {
+			return abs
+		}
+		return "themes"
+	}
+
+	// 2. Comprobar ruta relativa al binario ejecutable
+	if exe, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exe)
+		cand := filepath.Join(exeDir, "themes")
+		if stat, err := os.Stat(cand); err == nil && stat.IsDir() {
+			return cand
+		}
+	}
+
+	// 3. Buscar subiendo por el árbol de directorios padres
+	if cwd, err := os.Getwd(); err == nil {
+		curr := cwd
+		for i := 0; i < 5; i++ {
+			cand := filepath.Join(curr, "themes")
+			if stat, err := os.Stat(cand); err == nil && stat.IsDir() {
+				return cand
+			}
+			parent := filepath.Dir(curr)
+			if parent == curr {
+				break
+			}
+			curr = parent
+		}
+	}
+
+	// 4. Ruta absoluta de contingencia del proyecto
+	hardcoded := "/Users/manuel/antiProyectos/uikit/themes"
+	if stat, err := os.Stat(hardcoded); err == nil && stat.IsDir() {
+		return hardcoded
+	}
+
+	return "themes"
+}
+
 func main() {
 	myApp := app.NewWithID("com.uikit.showcase")
 	myWindow := myApp.NewWindow("UIKit Component Gallery & CSS Themes - Fyne 2.8")
-	myWindow.Resize(fyne.NewSize(1260, 860))
+	myWindow.Resize(fyne.NewSize(1280, 880))
 
 	// -------------------------------------------------------------------------
 	// 0. Carga e Inicialización de Temas CSS Externos
 	// -------------------------------------------------------------------------
-	uikit.LoadAndRegisterExternalThemesDetailed("themes")
+	themesDir := findThemesDir()
+	initReport := uikit.LoadAndRegisterExternalThemesDetailed(themesDir)
 	uikit.SetAppTheme(uikit.ThemeLight)
 
 	// Fondo de aplicación reactivo al tema
@@ -68,7 +115,131 @@ func main() {
 	)
 
 	// -------------------------------------------------------------------------
-	// 2. Tarjetas KPI / Métricas (KPICard)
+	// 2. Panel Superior Destacado: Selector y Gestor de Temas CSS
+	// -------------------------------------------------------------------------
+	lblThemesInfo := uikit.NewCaptionLabel(
+		fmt.Sprintf("Carpeta: %s • %d temas CSS cargados", themesDir, initReport.Count),
+		uikit.ThemeColor(uikit.ColorNameTextMuted),
+	)
+
+	var selectTopTheme *widget.Select
+	var selectSidebarTheme *widget.Select
+	var chipThemeTop *uikit.ModernChipFilter
+	var lblBrand *canvas.Text
+	var sidebar *uikit.ModernSidebar
+
+	applyTheme := func(themeID string, showFeedback bool) {
+		th := uikit.SetAppTheme(themeID)
+
+		// 1. Fondo de ventana sincronizado
+		appBg.FillColor = uikit.ThemeColor(uikit.ColorNameAppBackground)
+		appBg.Refresh()
+
+		// 2. Elementos gráficos personalizados del sidebar
+		if lblBrand != nil {
+			lblBrand.Color = uikit.ThemeColor(uikit.ColorNameTextPrimary)
+			lblBrand.Refresh()
+		}
+
+		// 3. Refrescar recursivamente todo el árbol de controles
+		uikit.RefreshTree(myWindow.Content())
+		myWindow.Content().Refresh()
+
+		// 4. Sincronizar selectores
+		_, _, disp := getThemesList()
+		if selectTopTheme != nil && selectTopTheme.Selected != disp {
+			selectTopTheme.Selected = disp
+			selectTopTheme.Refresh()
+		}
+		if selectSidebarTheme != nil && selectSidebarTheme.Selected != disp {
+			selectSidebarTheme.Selected = disp
+			selectSidebarTheme.Refresh()
+		}
+		if chipThemeTop != nil && chipThemeTop.Selected() != disp {
+			chipThemeTop.SetSelectedSilent(disp)
+		}
+
+		if showFeedback {
+			displayName := th.Name()
+			if pal := uikit.GetThemePalette(themeID); pal != nil && pal.DisplayName != "" {
+				displayName = pal.DisplayName
+			}
+			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastSuccess, fmt.Sprintf("Tema aplicado: %s", displayName))
+		}
+	}
+
+	selectTopTheme = widget.NewSelect(themeDisplays, func(selected string) {
+		if id, ok := themeMap[selected]; ok {
+			applyTheme(id, true)
+		}
+	})
+	selectTopTheme.Selected = currentDisplay
+
+	btnReloadTop := uikit.NewButton("Primary", "Recargar Temas CSS", theme.ViewRefreshIcon(), false, func() {
+		rep := uikit.LoadAndRegisterExternalThemesDetailed(themesDir)
+		td, tm, cur := getThemesList()
+		themeDisplays = td
+		themeMap = tm
+
+		selectTopTheme.Options = themeDisplays
+		selectTopTheme.Selected = cur
+		selectTopTheme.Refresh()
+
+		if selectSidebarTheme != nil {
+			selectSidebarTheme.Options = themeDisplays
+			selectSidebarTheme.Selected = cur
+			selectSidebarTheme.Refresh()
+		}
+
+		if chipThemeTop != nil {
+			chipThemeTop.SetOptions(themeDisplays)
+			chipThemeTop.SetSelectedSilent(cur)
+		}
+
+		lblThemesInfo.SetText(fmt.Sprintf("Carpeta: %s • %d temas CSS cargados", themesDir, rep.Count))
+
+		applyTheme(uikit.GetCurrentThemeName(), false)
+
+		if len(rep.Errors) > 0 {
+			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastDanger, fmt.Sprintf("Error CSS: %s", rep.Errors[0]))
+		} else {
+			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastSuccess, fmt.Sprintf("%d temas CSS recargados en caliente", rep.Count))
+		}
+	})
+
+	btnOpenFolder := uikit.NewButton("Default", "Abrir Carpeta Temas", theme.FolderOpenIcon(), false, func() {
+		_ = uikit.OpenFolderInOS(themesDir)
+	})
+
+	switchGlass := uikit.NewSwitch("Efecto Cristal (Glass)", false, func(active bool) {
+		uikit.SetGlobalGlassButtons(active)
+		uikit.RefreshTree(myWindow.Content())
+		myWindow.Content().Refresh()
+	})
+
+	themeControlsRow := container.NewHBox(
+		container.NewCenter(widget.NewLabelWithStyle("Tema Activo:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})),
+		selectTopTheme,
+		uiSpacer(8, 1),
+		btnReloadTop,
+		btnOpenFolder,
+		uiSpacer(8, 1),
+		switchGlass,
+	)
+
+	cardThemeManager := uikit.NewCard(container.NewVBox(
+		container.NewHBox(
+			container.NewCenter(uikit.NewColoredIcon("sliders", 20, "#107c41")),
+			uikit.NewSectionTitle("Gestor y Selector de Temas Visuales (CSS en Caliente)"),
+			layout.NewSpacer(),
+			lblThemesInfo,
+		),
+		widget.NewSeparator(),
+		themeControlsRow,
+	))
+
+	// -------------------------------------------------------------------------
+	// 3. Tarjetas KPI / Métricas (KPICard)
 	// -------------------------------------------------------------------------
 	kpi1 := uikit.NewKPICard(uikit.KPICardEmerald, "Usuarios Activos", "14.280", "+12.5% este mes")
 	kpi2 := uikit.NewKPICard(uikit.KPICardBlue, "Tiempo de Respuesta", "120 ms", "-18% latencia")
@@ -82,7 +253,7 @@ func main() {
 	))
 
 	// -------------------------------------------------------------------------
-	// 3. Sección de Botones Modernos (ModernButton con Loading & Glass)
+	// 4. Sección de Botones Modernos (ModernButton con Loading & Glass)
 	// -------------------------------------------------------------------------
 	var btnLoading *uikit.ModernButton
 	btnLoading = uikit.NewPrimaryButton("Procesar Cálculo", theme.MediaPlayIcon(), func() {
@@ -126,7 +297,7 @@ func main() {
 	))
 
 	// -------------------------------------------------------------------------
-	// 4. Sección de Deslizadores Modernos (ModernSlider)
+	// 5. Sección de Deslizadores Modernos (ModernSlider)
 	// -------------------------------------------------------------------------
 	lblSliderOutput := uikit.NewModernLabel("Mueve los deslizadores para ver la reactividad en tiempo real...", uikit.StyleBody)
 
@@ -171,7 +342,7 @@ func main() {
 	))
 
 	// -------------------------------------------------------------------------
-	// 5. Sección de Indicadores de Carga (ModernSpinner)
+	// 6. Sección de Indicadores de Carga (ModernSpinner)
 	// -------------------------------------------------------------------------
 	spinSmall := uikit.NewPrimarySpinner(uikit.SpinnerSmall).Start()
 	spinMed := uikit.NewSuccessSpinner(uikit.SpinnerMedium).Start()
@@ -199,7 +370,7 @@ func main() {
 	))
 
 	// -------------------------------------------------------------------------
-	// 6. Badges, Pastillas e Interruptores (ModernBadge, Switch)
+	// 7. Badges, Pastillas e Interruptores (ModernBadge, Switch)
 	// -------------------------------------------------------------------------
 	badge1 := uikit.NewBadge(uikit.BadgeSuccess, "Aprobado")
 	badge2 := uikit.NewBadge(uikit.BadgePrimary, "En Revisión")
@@ -218,7 +389,7 @@ func main() {
 	)
 
 	// -------------------------------------------------------------------------
-	// 7. Filtros Desplegables Tipo Pastilla (ModernChipFilter)
+	// 8. Filtros Desplegables Tipo Pastilla (ModernChipFilter)
 	// -------------------------------------------------------------------------
 	chipYear := uikit.NewChipFilter("Año:", []string{"Todos los años", "2026", "2025", "2024", "2023"}, "Todos los años", func(sel string) {
 		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, "Filtro activo: "+sel)
@@ -228,16 +399,21 @@ func main() {
 		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, "Estado filtrado: "+sel)
 	})
 
-	var chipThemeTop *uikit.ModernChipFilter
+	chipThemeTop = uikit.NewChipFilter("Tema CSS:", themeDisplays, currentDisplay, func(selected string) {
+		if id, ok := themeMap[selected]; ok {
+			applyTheme(id, true)
+		}
+	})
 
 	chipFiltersRow := container.NewHBox(
 		widget.NewLabel("Filtros Interactivos:"),
 		chipYear,
 		chipStatus,
+		chipThemeTop,
 	)
 
 	// -------------------------------------------------------------------------
-	// 8. Selector de Fechas (ModernDatePicker)
+	// 9. Selector de Fechas (ModernDatePicker)
 	// -------------------------------------------------------------------------
 	datePicker := uikit.NewModernDatePicker(time.Now(), func(t time.Time) {
 		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, "Fecha seleccionada: "+t.Format("02/01/2006"))
@@ -253,10 +429,11 @@ func main() {
 	))
 
 	// -------------------------------------------------------------------------
-	// 9. Contenedor Dinámico Principal (Centro)
+	// 10. Contenedor Dinámico Principal (Centro)
 	// -------------------------------------------------------------------------
 	allContent := container.NewVBox(
 		header,
+		cardThemeManager,
 		cardKPIs,
 		cardButtons,
 		cardSliders,
@@ -274,13 +451,20 @@ func main() {
 	}
 
 	// -------------------------------------------------------------------------
-	// 10. Construcción de ModernSidebar (Barra Lateral Izquierda)
+	// 11. Construcción de ModernSidebar (Barra Lateral Izquierda)
 	// -------------------------------------------------------------------------
 	brandIcon := uikit.NewColoredIcon("sliders", 22, "#107c41")
-	lblBrand := canvas.NewText("UIKit Gallery", uikit.ThemeColor(uikit.ColorNameTextPrimary))
+	lblBrand = canvas.NewText("UIKit Gallery", uikit.ThemeColor(uikit.ColorNameTextPrimary))
 	lblBrand.TextStyle = fyne.TextStyle{Bold: true}
 	lblBrand.TextSize = 15
 	badgeVersion := uikit.NewBadge(uikit.BadgeSuccess, "v2.8")
+
+	selectSidebarTheme = widget.NewSelect(themeDisplays, func(selected string) {
+		if id, ok := themeMap[selected]; ok {
+			applyTheme(id, true)
+		}
+	})
+	selectSidebarTheme.Selected = currentDisplay
 
 	sidebarHeader := container.NewPadded(container.NewVBox(
 		container.NewHBox(
@@ -289,7 +473,10 @@ func main() {
 			layout.NewSpacer(),
 			badgeVersion,
 		),
-		uikit.NewCaptionLabel("Catálogo Oficial & Gestor CSS", uikit.ThemeColor(uikit.ColorNameTextMuted)),
+		uikit.NewCaptionLabel("Catálogo Oficial de Componentes", uikit.ThemeColor(uikit.ColorNameTextMuted)),
+		uiSpacer(1, 4),
+		uikit.NewCaptionLabel("TEMA ACTIVO:", uikit.ThemeColor(uikit.ColorNameTextMuted)),
+		selectSidebarTheme,
 		widget.NewSeparator(),
 	))
 
@@ -313,28 +500,33 @@ func main() {
 	})
 	btnAll.SetVariant(uikit.ButtonPrimary) // Seleccionado por defecto
 
+	btnThemesView := addNav("Temas & Estilos CSS", theme.ColorPaletteIcon(), func() {
+		setView(container.NewVBox(header, cardThemeManager))
+	})
+
 	btnKPI := addNav("Métricas & KPIs", theme.ComputerIcon(), func() {
-		setView(container.NewVBox(header, cardKPIs))
+		setView(container.NewVBox(header, cardThemeManager, cardKPIs))
 	})
 
 	btnBtns := addNav("Botones & Carga", theme.MediaPlayIcon(), func() {
-		setView(container.NewVBox(header, cardButtons))
+		setView(container.NewVBox(header, cardThemeManager, cardButtons))
 	})
 
 	btnSliders := addNav("Deslizadores (Sliders)", theme.MoveDownIcon(), func() {
-		setView(container.NewVBox(header, cardSliders))
+		setView(container.NewVBox(header, cardThemeManager, cardSliders))
 	})
 
 	btnSpin := addNav("Indicadores (Spinners)", theme.ViewRefreshIcon(), func() {
-		setView(container.NewVBox(header, cardSpinners))
+		setView(container.NewVBox(header, cardThemeManager, cardSpinners))
 	})
 
 	btnChips := addNav("Filtros & Insignias", theme.MenuIcon(), func() {
-		setView(container.NewVBox(header, cardBadgesAndFilters))
+		setView(container.NewVBox(header, cardThemeManager, cardBadgesAndFilters))
 	})
 
 	sidebarNavList := container.NewVBox(
 		btnAll,
+		btnThemesView,
 		btnKPI,
 		btnBtns,
 		btnSliders,
@@ -342,102 +534,14 @@ func main() {
 		btnChips,
 	)
 
-	// -------------------------------------------------------------------------
-	// 11. Selector y Gestor de Temas CSS en Vivo
-	// -------------------------------------------------------------------------
-	var sidebarThemeSelect *widget.Select
-	var sidebar *uikit.ModernSidebar
-
-	applyTheme := func(themeID string, showFeedback bool) {
-		th := uikit.SetAppTheme(themeID)
-
-		// 1. Fondo de la ventana sincronizado
-		appBg.FillColor = uikit.ThemeColor(uikit.ColorNameAppBackground)
-		appBg.Refresh()
-
-		// 2. Elementos gráficos personalizados del sidebar
-		lblBrand.Color = uikit.ThemeColor(uikit.ColorNameTextPrimary)
-		lblBrand.Refresh()
-
-		// 3. Refrescar recursivamente todo el árbol de controles
-		uikit.RefreshTree(myWindow.Content())
-		myWindow.Content().Refresh()
-
-		// 4. Sincronizar selectores
-		_, _, disp := getThemesList()
-		if sidebarThemeSelect != nil && sidebarThemeSelect.Selected != disp {
-			sidebarThemeSelect.Selected = disp
-			sidebarThemeSelect.Refresh()
-		}
-		if chipThemeTop != nil && chipThemeTop.Selected() != disp {
-			chipThemeTop.SetSelectedSilent(disp)
-		}
-
-		if showFeedback {
-			displayName := th.Name()
-			if pal := uikit.GetThemePalette(themeID); pal != nil && pal.DisplayName != "" {
-				displayName = pal.DisplayName
-			}
-			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastSuccess, fmt.Sprintf("Tema aplicado: %s", displayName))
-		}
-	}
-
-	sidebarThemeSelect = widget.NewSelect(themeDisplays, func(selected string) {
-		if id, ok := themeMap[selected]; ok {
-			applyTheme(id, true)
-		}
-	})
-	sidebarThemeSelect.Selected = currentDisplay
-
-	// Chip Filter en la barra de filtros superior para alternar temas directamente
-	chipThemeTop = uikit.NewChipFilter("Tema CSS:", themeDisplays, currentDisplay, func(selected string) {
-		if id, ok := themeMap[selected]; ok {
-			applyTheme(id, true)
-		}
-	})
-	chipFiltersRow.Add(chipThemeTop)
-
-	btnReloadThemes := uikit.NewButton("Primary", "Recargar Temas CSS", theme.ViewRefreshIcon(), false, func() {
-		report := uikit.LoadAndRegisterExternalThemesDetailed("themes")
-		td, tm, cur := getThemesList()
-		themeDisplays = td
-		themeMap = tm
-
-		sidebarThemeSelect.Options = themeDisplays
-		sidebarThemeSelect.Selected = cur
-		sidebarThemeSelect.Refresh()
-
-		chipThemeTop.SetOptions(themeDisplays)
-		chipThemeTop.SetSelectedSilent(cur)
-
-		applyTheme(uikit.GetCurrentThemeName(), false)
-
-		if len(report.Errors) > 0 {
-			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastDanger, fmt.Sprintf("Error CSS: %s", report.Errors[0]))
-		} else {
-			uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastSuccess, fmt.Sprintf("%d temas CSS registrados en caliente", report.Count))
-		}
-	})
-
-	switchGlass := uikit.NewSwitch("Efecto Cristal (Glass)", false, func(active bool) {
-		uikit.SetGlobalGlassButtons(active)
-		uikit.RefreshTree(myWindow.Content())
-		myWindow.Content().Refresh()
-	})
-
 	sidebarFooter := container.NewPadded(container.NewVBox(
 		widget.NewSeparator(),
-		uikit.NewCaptionLabel("TEMA VISUAL & CSS:", uikit.ThemeColor(uikit.ColorNameTextMuted)),
-		sidebarThemeSelect,
-		uiSpacer(1, 4),
-		btnReloadThemes,
-		switchGlass,
 		container.NewCenter(uikit.NewCaptionLabel("Fyne 2.8 • Modern UI Toolkit", uikit.ThemeColor(uikit.ColorNameTextMuted))),
 	))
 
 	// Sidebar contenedor nativo UIKit
 	sidebar = uikit.NewSidebarContainer(
-		255,
+		260,
 		sidebarHeader,
 		container.NewPadded(sidebarNavList),
 		sidebarFooter,
@@ -450,15 +554,15 @@ func main() {
 		container.NewPadded(scrollArea),
 	)
 
-	// Envolver con fondo nativo
+	// Envolver con fondo nativo reactivo
 	rootStack := container.NewStack(appBg, mainLayout)
 	myWindow.SetContent(rootStack)
 
 	// Iniciar vigía de temas CSS en segundo plano (ThemeWatcher)
-	watcher := uikit.NewThemeWatcher("themes", func(filePath string) {
-		uikit.LoadAndRegisterExternalThemesDetailed("themes")
+	watcher := uikit.NewThemeWatcher(themesDir, func(filePath string) {
+		uikit.LoadAndRegisterExternalThemesDetailed(themesDir)
 		applyTheme(uikit.GetCurrentThemeName(), false)
-		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, fmt.Sprintf("Tema CSS recargado en vivo (%s)", filepath.Base(filePath)))
+		uikit.ShowPopUp(myWindow.Canvas(), uikit.ToastInfo, fmt.Sprintf("CSS recargado en vivo: %s", filepath.Base(filePath)))
 	})
 	watcher.Start()
 
