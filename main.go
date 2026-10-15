@@ -6,7 +6,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -16,7 +18,7 @@ import (
 func main() {
 	myApp := app.NewWithID("com.uikit.showcase")
 	myWindow := myApp.NewWindow("UIKit Component Gallery - Fyne 2.8")
-	myWindow.Resize(fyne.NewSize(1040, 800))
+	myWindow.Resize(fyne.NewSize(1240, 850))
 
 	// Configurar tema claro por defecto
 	currentTheme := uikit.NewAppTheme()
@@ -41,6 +43,10 @@ func main() {
 	kpi4 := uikit.NewKPICard(uikit.KPICardAmber, "Incidencias", "0 críticas", "Estable")
 
 	kpiGrid := container.NewGridWithColumns(4, kpi1, kpi2, kpi3, kpi4)
+	cardKPIs := uikit.NewCard(container.NewVBox(
+		uikit.NewSectionTitle("Métricas y Tarjetas KPI (KPICard)"),
+		kpiGrid,
+	))
 
 	// -------------------------------------------------------------------------
 	// 3. Sección de Botones Modernos (ModernButton con Loading & Glass)
@@ -72,10 +78,6 @@ func main() {
 	btnSmall := uikit.NewSmallPrimaryButton("Acción Compacta", theme.ContentAddIcon(), func() {})
 	btnIcon := uikit.NewIconButton(theme.SettingsIcon(), func() {})
 
-	switchGlass := uikit.NewSwitch("Efecto Cristal (Glass)", false, func(active bool) {
-		uikit.SetGlobalGlassButtons(active)
-	})
-
 	buttonsRow := container.NewHBox(
 		btnLoading,
 		btnPrimary,
@@ -83,8 +85,12 @@ func main() {
 		btnDefault,
 		btnSmall,
 		btnIcon,
-		switchGlass,
 	)
+
+	cardButtons := uikit.NewCard(container.NewVBox(
+		uikit.NewSectionTitle("Botones & Estados de Carga (ModernButton)"),
+		buttonsRow,
+	))
 
 	// -------------------------------------------------------------------------
 	// 4. Sección de Deslizadores Modernos (ModernSlider)
@@ -126,6 +132,11 @@ func main() {
 		lblSliderOutput,
 	)
 
+	cardSliders := uikit.NewCard(container.NewVBox(
+		uikit.NewSectionTitle("Deslizadores Numéricos Reactivos (ModernSlider)"),
+		slidersBox,
+	))
+
 	// -------------------------------------------------------------------------
 	// 5. Sección de Indicadores de Carga (ModernSpinner)
 	// -------------------------------------------------------------------------
@@ -148,6 +159,11 @@ func main() {
 		spinHero, widget.NewLabel("48px (Hero)"),
 		btnToggleSpinners,
 	)
+
+	cardSpinners := uikit.NewCard(container.NewVBox(
+		uikit.NewSectionTitle("Indicadores Circulares de Actividad (ModernSpinner)"),
+		spinnersRow,
+	))
 
 	// -------------------------------------------------------------------------
 	// 6. Badges, Pastillas e Interruptores (ModernBadge, Switch)
@@ -196,10 +212,103 @@ func main() {
 		datePicker.Container,
 	)
 
+	cardBadgesAndFilters := uikit.NewCard(container.NewVBox(
+		uikit.NewSectionTitle("Insignias, Filtros, Interruptores & Fechas"),
+		container.NewVBox(badgesRow, chipFiltersRow, datePickerRow),
+	))
+
 	// -------------------------------------------------------------------------
-	// 8. Barra de Control de Tema (Light / Dark)
+	// 9. Contenedor Dinámico Principal (Centro)
 	// -------------------------------------------------------------------------
-	switchTheme := uikit.NewSwitch("Tema Oscuro (Dark Mode)", false, func(dark bool) {
+	allContent := container.NewVBox(
+		header,
+		cardKPIs,
+		cardButtons,
+		cardSliders,
+		cardSpinners,
+		cardBadgesAndFilters,
+	)
+
+	scrollArea := container.NewVScroll(allContent)
+
+	// Función para conmutar vista central desde el Sidebar
+	setView := func(target fyne.CanvasObject) {
+		scrollArea.Content = target
+		scrollArea.ScrollToTop()
+		scrollArea.Refresh()
+	}
+
+	// -------------------------------------------------------------------------
+	// 10. Construcción de ModernSidebar (Barra Lateral Izquierda)
+	// -------------------------------------------------------------------------
+	brandIcon := uikit.NewColoredIcon("sliders", 22, "#107c41")
+	lblBrand := canvas.NewText("UIKit Gallery", uikit.ThemeColor(uikit.ColorNameTextPrimary))
+	lblBrand.TextStyle = fyne.TextStyle{Bold: true}
+	lblBrand.TextSize = 15
+	badgeVersion := uikit.NewBadge(uikit.BadgeSuccess, "v2.8")
+
+	sidebarHeader := container.NewPadded(container.NewVBox(
+		container.NewHBox(
+			brandIcon,
+			lblBrand,
+			layout.NewSpacer(),
+			badgeVersion,
+		),
+		uikit.NewCaptionLabel("Catálogo Oficial de Componentes", uikit.ThemeColor(uikit.ColorNameTextMuted)),
+		widget.NewSeparator(),
+	))
+
+	// Botones de Navegación del Sidebar
+	var navBtns []*uikit.ModernButton
+	addNav := func(title string, ic fyne.Resource, action func()) *uikit.ModernButton {
+		var btn *uikit.ModernButton
+		btn = uikit.NewButton("Default", title, ic, false, func() {
+			for _, b := range navBtns {
+				b.SetVariant(uikit.ButtonDefault)
+			}
+			btn.SetVariant(uikit.ButtonPrimary)
+			action()
+		})
+		navBtns = append(navBtns, btn)
+		return btn
+	}
+
+	btnAll := addNav("Vista Completa", theme.HomeIcon(), func() {
+		setView(allContent)
+	})
+	btnAll.SetVariant(uikit.ButtonPrimary) // Seleccionado por defecto
+
+	btnKPI := addNav("Métricas & KPIs", theme.ComputerIcon(), func() {
+		setView(container.NewVBox(header, cardKPIs))
+	})
+
+	btnBtns := addNav("Botones & Carga", theme.MediaPlayIcon(), func() {
+		setView(container.NewVBox(header, cardButtons))
+	})
+
+	btnSliders := addNav("Deslizadores (Sliders)", theme.MoveDownIcon(), func() {
+		setView(container.NewVBox(header, cardSliders))
+	})
+
+	btnSpin := addNav("Indicadores (Spinners)", theme.ViewRefreshIcon(), func() {
+		setView(container.NewVBox(header, cardSpinners))
+	})
+
+	btnChips := addNav("Filtros & Insignias", theme.MenuIcon(), func() {
+		setView(container.NewVBox(header, cardBadgesAndFilters))
+	})
+
+	sidebarNavList := container.NewVBox(
+		btnAll,
+		btnKPI,
+		btnBtns,
+		btnSliders,
+		btnSpin,
+		btnChips,
+	)
+
+	// Controles del Footer del Sidebar
+	switchTheme := uikit.NewSwitch("Modo Oscuro", false, func(dark bool) {
 		if dark {
 			myApp.Settings().SetTheme(uikit.NewDarkTheme())
 		} else {
@@ -207,47 +316,32 @@ func main() {
 		}
 	})
 
-	themeBar := container.NewHBox(
-		widget.NewLabel("Ajuste de Entorno:"),
+	switchGlass := uikit.NewSwitch("Efecto Cristal", false, func(active bool) {
+		uikit.SetGlobalGlassButtons(active)
+	})
+
+	sidebarFooter := container.NewPadded(container.NewVBox(
+		widget.NewSeparator(),
 		switchTheme,
+		switchGlass,
+		container.NewCenter(uikit.NewCaptionLabel("Fyne 2.8 • Modern UI Toolkit", uikit.ThemeColor(uikit.ColorNameTextMuted))),
+	))
+
+	// Sidebar contenedor nativo UIKit
+	sidebar := uikit.NewSidebarContainer(
+		250,
+		sidebarHeader,
+		container.NewPadded(sidebarNavList),
+		sidebarFooter,
 	)
 
-	// -------------------------------------------------------------------------
-	// Ensamblado en Tarjetas de Sección
-	// -------------------------------------------------------------------------
-	cardButtons := uikit.NewCard(container.NewVBox(
-		uikit.NewSectionTitle("Botones & Estados de Carga (ModernButton)"),
-		buttonsRow,
-	))
-
-	cardSliders := uikit.NewCard(container.NewVBox(
-		uikit.NewSectionTitle("Deslizadores Numéricos Reactivos (ModernSlider)"),
-		slidersBox,
-	))
-
-	cardSpinners := uikit.NewCard(container.NewVBox(
-		uikit.NewSectionTitle("Indicadores Circulares de Actividad (ModernSpinner)"),
-		spinnersRow,
-	))
-
-	cardBadges := uikit.NewCard(container.NewVBox(
-		uikit.NewSectionTitle("Insignias, Filtros, Interruptores & Fechas"),
-		container.NewVBox(badgesRow, chipFiltersRow, datePickerRow),
-	))
-
-	content := container.NewVBox(
-		header,
-		themeBar,
-		kpiGrid,
-		cardButtons,
-		cardSliders,
-		cardSpinners,
-		cardBadges,
+	// Layout con distribución Border: Sidebar fijo a la izquierda + Scroll central
+	mainLayout := container.NewBorder(
+		nil, nil,
+		sidebar, nil,
+		container.NewPadded(scrollArea),
 	)
 
-	// Contenedor con scroll vertical para navegación fluida
-	scroll := container.NewVScroll(content)
-
-	myWindow.SetContent(container.NewPadded(scroll))
+	myWindow.SetContent(mainLayout)
 	myWindow.ShowAndRun()
 }
