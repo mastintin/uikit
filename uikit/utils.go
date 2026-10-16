@@ -27,8 +27,18 @@ func DateToStrEu(dfecha time.Time) string {
 	return dateToStrBase(dfecha, true)
 }
 
+// DateToStrEU alias con mayúsculas idéntico a DateToStrEu (formato europeo DD/MM/AAAA)
+func DateToStrEU(dfecha time.Time) string {
+	return dateToStrBase(dfecha, true)
+}
+
 // DateToStrUs formatea la fecha en formato estadounidense (MM/DD/AAAA)
 func DateToStrUs(dfecha time.Time) string {
+	return dateToStrBase(dfecha, false)
+}
+
+// DateToStrUS alias con mayúsculas idéntico a DateToStrUs (formato estadounidense MM/DD/AAAA)
+func DateToStrUS(dfecha time.Time) string {
 	return dateToStrBase(dfecha, false)
 }
 
