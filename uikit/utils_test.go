@@ -51,3 +51,25 @@ func TestDateToStr(t *testing.T) {
 		t.Errorf("dateToStrBase(false) = %q; want 10/16/2026", baseUs)
 	}
 }
+
+func TestConCatStr(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []string
+		expected string
+	}{
+		{"empty", []string{}, ""},
+		{"single", []string{"hola"}, "hola"},
+		{"multiple", []string{"Go", "Jubila", " ", "2026"}, "GoJubila 2026"},
+		{"symbols", []string{"1.234", ",", "56", " €"}, "1.234,56 €"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			res := ConCatStr(tc.input...)
+			if res != tc.expected {
+				t.Errorf("ConCatStr(%v) = %q; want %q", tc.input, res, tc.expected)
+			}
+		})
+	}
+}

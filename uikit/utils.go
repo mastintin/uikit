@@ -2,6 +2,7 @@ package uikit
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -26,4 +27,13 @@ func DateToStrEu(dfecha time.Time) string {
 // DateToStrUs formatea la fecha en formato estadounidense (MM/DD/AAAA)
 func DateToStrUs(dfecha time.Time) string {
 	return dateToStrBase(dfecha, false)
+}
+
+// ConCatStr une tus strings de manera estrictamente literal y exacta mediante strings.Builder.
+func ConCatStr(sList ...string) string {
+	var sb strings.Builder
+	for _, s := range sList {
+		sb.WriteString(s)
+	}
+	return sb.String()
 }
