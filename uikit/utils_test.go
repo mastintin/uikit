@@ -73,3 +73,24 @@ func TestConCatStr(t *testing.T) {
 		})
 	}
 }
+
+func TestAAddStr(t *testing.T) {
+	var lines []string
+	AAddStr(&lines, "linea 1")
+	AAddStr(&lines, "linea 2")
+	AAddStr(&lines, "linea 3")
+
+	if len(lines) != 3 {
+		t.Fatalf("Expected 3 lines, got %d", len(lines))
+	}
+	if lines[0] != "linea 1" || lines[1] != "linea 2" || lines[2] != "linea 3" {
+		t.Errorf("Unexpected content: %v", lines)
+	}
+}
+
+func TestCRLF(t *testing.T) {
+	if CRLF != "\n" {
+		t.Errorf("CRLF = %q; want %q", CRLF, "\n")
+	}
+}
+

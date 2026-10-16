@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// CRLF representa el salto de línea estándar
+const CRLF = "\n"
+
 // ValToStr convierte cualquier valor a su representación en string mediante fmt.Sprint.
 func ValToStr(xval any) string {
 	return fmt.Sprint(xval)
@@ -37,3 +40,9 @@ func ConCatStr(sList ...string) string {
 	}
 	return sb.String()
 }
+
+// AAddStr añade el string final a tu lista por referencia
+func AAddStr(lines *[]string, texto string) {
+	*lines = append(*lines, texto)
+}
+
